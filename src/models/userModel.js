@@ -64,7 +64,7 @@ const update = async (userId, updateData) => {
       }
     })
 
-    const result = await GET_DB.collection(USER_COLLECTION_NAME).findOneAndUpdate(
+    const result = await GET_DB().collection(USER_COLLECTION_NAME).findOneAndUpdate(
       { _id: new ObjectId(userId) },
       { $set: updateData },
       { returnDocument: 'after' }

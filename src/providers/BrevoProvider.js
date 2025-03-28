@@ -1,10 +1,10 @@
 const brevo = require('@getbrevo/brevo')
-import { BREVO_KEY } from '~/config/environment.js'
+import { env } from '~/config/environment'
 
 
 let apiInstance = new brevo.TransactionalEmailsApi()
 let apiKey = apiInstance.authentications['apiKey']
-apiKey.apiKey = BREVO_KEY
+apiKey.apiKey = env.BREVO_KEY
 
 
 const sendEmail = async (recipientEmail, subject, htmlContent) => {

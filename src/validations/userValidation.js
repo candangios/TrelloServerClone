@@ -17,8 +17,36 @@ const createNew = async (req, res, next) => {
     // MiddleWear handle error
     next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message))
   }
+}
 
+const login = async (req, res, next) => {
+  const conrrectCondition = Joi.object({
+    email: Joi.string().required().pattern(EMAIL_RULE).message(EMAIL_RULE_MESSAGE),
+    password: Joi.string().required().pattern(PASSWORD_RULE).message(PASSWORD_RULE_MESSAGE),
+  })
+  try {
+    await conrrectCondition.validateAsync(req.body, { abortEarly: false })
+    next()
+  } catch (error) {
+    // MiddleWear handle error
+    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message))
+  }
+}
+const verifyAccount = async (req, res, next) => {
+  const conrrectCondition = Joi.object({
+    email: Joi.string().required().pattern(EMAIL_RULE).message(EMAIL_RULE_MESSAGE),
+    token: Joi.string().required()
+  })
+  try {
+    await conrrectCondition.validateAsync(req.body, { abortEarly: false })
+    next()
+  } catch (error) {
+    // MiddleWear handle error
+    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message))
+  }
 }
 export const userValidation = {
-  createNew
+  createNew,
+  login,
+  verifyAccount
 }
