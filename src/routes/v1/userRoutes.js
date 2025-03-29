@@ -11,5 +11,9 @@ Router.route('/verify')
   .post(userValidation.verifyAccount, userController.verifyAccount)
 Router.route('/login')
   .post(userValidation.login, userController.login)
+Router.route('/refresh_token')
+  .get(userController.refreshToken)
+Router.route('/logout')
+  .delete(userController.logout)
 
 export const userRouters = Router
