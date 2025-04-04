@@ -15,5 +15,17 @@ const createNew = async (reqBody) => {
     throw error
   }
 }
+const update = async (userId, columnId, reqBody) => {
+  try {
+    const updateData = {
+      ...reqBody,
+      updatedAt: Date.now()
+    }
+    const result = await columnModel.update(userId, columnId, updateData)
+    return result
+  } catch (error) {
+    throw error
+  }
+}
 
-export const columnService = { createNew }
+export const columnService = { createNew, update }

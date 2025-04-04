@@ -64,7 +64,16 @@ const refreshToken = async (req, res, next) => {
   } catch (error) {
     next(new ApiError(StatusCodes.FORBIDDEN, 'Please Sign In!'))
   }
-
+}
+const update = async (req, res, next) => {
+  try {
+    const userId = req.jwtDecoded._id
+    const userAvatarFile = req.file
+    const updateUser = await userService.update(userId, req.body, userAvatarFile)
+    res.status(StatusCodes.OK).json(updateUser)
+  } catch (error) {
+    next(error)
+  }
 }
 
 export const userController = {
@@ -72,5 +81,6 @@ export const userController = {
   verifyAccount,
   login,
   refreshToken,
-  logout
+  logout,
+  update
 }

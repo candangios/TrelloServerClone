@@ -9,7 +9,20 @@ const createNew = async (req, res, next) => {
   }
 
 }
+const update = async (req, res, next) => {
+  try {
+    const userInfo = req.jwtDecoded
+    const cardId = req.params.id
+    const cardCoverImageFile = req.file
+    const newColumn = await cardService.update(userInfo, cardId, cardCoverImageFile, req.body)
+    res.status(StatusCodes.OK).json(newColumn)
+  } catch (error) {
+    next(error)
+  }
+
+}
 
 export const cardController = {
   createNew,
+  update
 }

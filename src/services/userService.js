@@ -9,6 +9,7 @@ import { pick } from "lodash"
 import { JwtProvider } from "~/providers/JwtProvider"
 import { env } from "~/config/environment"
 import ms from 'ms'
+import { CloudinaryProvider } from "~/providers/CloudinaryProvider"
 
 
 const createNew = async (reqBody) => {
@@ -32,7 +33,6 @@ const createNew = async (reqBody) => {
       <h3>Here is your verify link:</h3>
       <h3>${verifycationLink}</h3>
     `
-
     await BrevoProvider.sendEmail(result.email, customSubject, htmlContent)
     return pickUser(result)
   } catch (error) {
@@ -71,26 +71,51 @@ const login = async (reqBody) => {
 }
 const refreshToken = async (refreshToken) => {
   try {
-    console.lo
     const refreshTokenDecoded = await JwtProvider.verifyToken(refreshToken, env.REFRESH_TOKEN_SECRET_SIGNATURE)
     const userInfo = {
       _id: refreshTokenDecoded._id,
       email: refreshTokenDecoded.email
     }
-    return await JwtProvider.generateToken(userInfo, env.ACCESS_TOKEN_SECRET_SIGNATURE, ms(env.ACCESS_TOKEN_LIFE))
+    const accessToken = await JwtProvider.generateToken(userInfo, env.ACCESS_TOKEN_SECRET_SIGNATURE, ms(env.ACCESS_TOKEN_LIFE))
+    return { accessToken }
+  } catch (error) {
+    throw error
+  }
+}
+
+const update = async (userId, reqBody, userAvatarFile) => {
+  try {
+    const existUser = await userModel.findOneById(userId)
+    if (!existUser) throw new ApiError(StatusCodes.NOT_FOUND, 'Account not found!')
+    if (!existUser.isActive) throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Please active account!')
+    let updateUser = {}
+    if (reqBody.current_password && reqBody.new_password) {
+      if (!bcryptjs.compareSync(reqBody.current_password, existUser.password)) {
+        throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Current password incorrect')
+      }
+      updateUser = await userModel.update(existUser._id, { password: bcryptjs.hashSync(reqBody.new_password, 8) })
+
+    } else if (userAvatarFile) {
+      const uploadResult = await CloudinaryProvider.streamUpload(userAvatarFile.buffer, 'UsersImage')
+      updateUser = await userModel.update(existUser._id, { avatar: uploadResult.secure_url })
+    } else {
+      updateUser = await userModel.update(existUser._id, reqBody)
+    }
+
+    return pickUser(updateUser)
   } catch (error) {
     throw error
   }
 
 }
-
 const pickUser = (user) => {
   if (!user) return {}
-  return pick(user, ['_id', 'email', 'username', 'displayname', 'avatar', 'rold', 'isActive', 'createdAt', 'updatedAt'])
+  return pick(user, ['_id', 'email', 'username', 'displayName', 'avatar', 'rold', 'isActive', 'createdAt', 'updatedAt'])
 }
 export const userService = {
   createNew,
   verifyAccount,
   login,
-  refreshToken
+  refreshToken,
+  update
 };

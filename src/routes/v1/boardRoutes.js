@@ -7,8 +7,11 @@ import { boardValidation } from '~/validations/boardValidation'
 const Router = express.Router()
 
 Router.route('/')
-  .get((req, res) => { res.status(StatusCodes.OK).json({ message: 'Note API get list board' }) })
+  .get(authMiddleWare.isAuthorized, boardController.getBoards)
   .post(authMiddleWare.isAuthorized, boardValidation.createNew, boardController.createNew)
+
+
 Router.route('/:id')
   .get(authMiddleWare.isAuthorized, boardController.boardDetails)
+  .put(authMiddleWare.isAuthorized, boardValidation.update, boardController.update)
 export const boardRouters = Router

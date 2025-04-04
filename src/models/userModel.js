@@ -10,7 +10,7 @@ const USER_ROLD = {
   ADMIN: 'admin'
 }
 
-const INVALID_UPDATE_FIELD = ["_id, email, username,createdAt"]
+const INVALID_UPDATE_FIELD = ["_id", "email", "username", "createdAt"]
 // Define Collection (name & schema)
 const USER_COLLECTION_NAME = 'users'
 const USER_COLLECTION_SCHEMA = Joi.object({
@@ -18,7 +18,7 @@ const USER_COLLECTION_SCHEMA = Joi.object({
   password: Joi.string().required(),
 
   username: Joi.string().required().trim().strict(),
-  displayname: Joi.string().required().trim().strict(),
+  displayName: Joi.string().required().trim().strict(),
 
   avatar: Joi.string().default(null),
   role: Joi.string().valid(USER_ROLD.ADMIN, USER_ROLD.CLIENT).default(USER_ROLD.CLIENT),
