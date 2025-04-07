@@ -108,7 +108,7 @@ const update = async (userId, reqBody, userAvatarFile) => {
   }
 
 }
-const pickUser = (user) => {
+export const pickUser = (user) => {
   if (!user) return {}
   return pick(user, ['_id', 'email', 'username', 'displayName', 'avatar', 'rold', 'isActive', 'createdAt', 'updatedAt'])
 }

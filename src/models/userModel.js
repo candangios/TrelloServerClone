@@ -1,6 +1,6 @@
 
 import Joi from 'joi'
-import { ObjectId, ReturnDocument } from 'mongodb'
+import { ObjectId } from 'mongodb'
 import { GET_DB } from '~/config/mongodb'
 import { EMAIL_RULE, EMAIL_RULE_MESSAGE, OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE, PASSWORD_RULE } from '~/utils/validators'
 
@@ -21,7 +21,7 @@ const USER_COLLECTION_SCHEMA = Joi.object({
   displayName: Joi.string().required().trim().strict(),
 
   avatar: Joi.string().default(null),
-  role: Joi.string().valid(USER_ROLD.ADMIN, USER_ROLD.CLIENT).default(USER_ROLD.CLIENT),
+  role: Joi.string().valid(...Object.values(USER_ROLD)).default(USER_ROLD.CLIENT),
 
   isActive: Joi.boolean().default(false),
   verifyToken: Joi.string(),
@@ -38,7 +38,6 @@ const validateBeforeCreate = async (data) => {
 
 const createNew = async (data) => {
   try {
-
     return await GET_DB().collection(USER_COLLECTION_NAME).insertOne(await validateBeforeCreate(data))
   } catch (error) {
     throw new Error(error)
