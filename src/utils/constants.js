@@ -8,8 +8,9 @@ export const INVITATION_TYPE = {
   BOARD_INVITATION: 'board invitation',
   CARD_INVITATION: 'card invitation'
 }
-export const INVITATION_STATUS = {
-  PEDDING: 'pedding',
-  ACCEPTED: 'accepted',
-  REJECTED: 'rejected'
+export const BOARD_INVITATION_STATUS = {
+  PENDING: 'PENDING',
+  ACCEPTED: 'ACCEPTED',
+  REJECTED: 'REJECTED'
 }
+

@@ -19,6 +19,6 @@ Router.use('/columns', columnRouters)
 //CardAPI
 Router.use('/cards', cardRouters)
 Router.use('/users', userRouters)
-Router.use('/invitation', invitationRouters)
+Router.use('/invitations', invitationRouters)
 
 export const APIs_V1 = Router

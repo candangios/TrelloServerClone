@@ -1,6 +1,8 @@
 import { ObjectId } from "mongodb"
 import { GET_DB } from "~/config/mongodb"
-import { INVITATION_STATUS, INVITATION_TYPE } from "~/utils/constants"
+import { BOARD_INVITATION_STATUS, INVITATION_TYPE } from "~/utils/constants"
+import { userModel } from "./userModel"
+import { boardModel } from "./boardModel"
 
 const Joi = require("joi")
 const { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } = require("~/utils/validators")
@@ -13,9 +15,9 @@ const INVITATION_COLLECTION_SCHEMA = Joi.object({
   type: Joi.string().required().valid(...Object.values(INVITATION_TYPE)),
   boardInvitation: Joi.object({
     boardId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
-    status: Joi.string().required().valid(...Object.values(INVITATION_STATUS))
+    status: Joi.string().required().valid(...Object.values(BOARD_INVITATION_STATUS))
   }),
-  createdAt: Joi.date().timestamp('javascript').default(Date.now()),
+  createdAt: Joi.date().timestamp('javascript').default(Date.now),
   updatedAt: Joi.date().timestamp().default(null),
   _destroy: Joi.boolean().default(false)
 })
@@ -63,13 +65,6 @@ const update = async (invitationId, updateData) => {
         delete updateData[fieldName]
       }
     })
-
-    if (updateData.boardInvitation) {
-      updateData.boardInvitation = {
-        ...updateData.boardInvitation,
-        boardId: new ObjectId(update.boardInvitation.id)
-      }
-    }
     const result = await GET_DB().collection(INVITATION_COLLECTION_NAME).findOneAndUpdate(
       { _id: new ObjectId(invitationId) },
       { $set: updateData },
@@ -81,10 +76,51 @@ const update = async (invitationId, updateData) => {
     throw new Error(error)
   }
 }
+const findByUserId = async (userId) => {
+  try {
+    const result = await GET_DB().collection(INVITATION_COLLECTION_NAME).aggregate([
+      {
+        $match: { $and: [{ inviteeId: new ObjectId(userId) }, { _destroy: false }] }
+      },
+      {
+        $lookup: {
+          from: userModel.USER_COLLECTION_NAME,
+          localField: 'inviterId',
+          foreignField: '_id',
+          as: 'inviter',
+          pipeline: [{ $project: { 'password': 0, 'verifyToken': 0 } }]
+        }
+      },
+      {
+        $lookup: {
+          from: userModel.USER_COLLECTION_NAME,
+          localField: 'inviteeId',
+          foreignField: '_id',
+          as: 'invitee',
+          pipeline: [{ $project: { 'password': 0, 'verifyToken': 0 } }]
+        }
+      },
+      {
+        $lookup: {
+          from: boardModel.BOARD_COLLECTION_NAME,
+          localField: 'boardInvitation.boardId',
+          foreignField: '_id',
+          as: 'board',
+        }
+      }
+
+    ]).toArray()
+    return result ?? []
+  } catch (error) {
+    throw new Error(error)
+  }
+
+}
 export const invitationModel = {
   INVITATION_COLLECTION_NAME,
   INVITATION_COLLECTION_SCHEMA,
   createNewBoardInvitation,
   findOneById,
-  update
+  update,
+  findByUserId
 }

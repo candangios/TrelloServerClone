@@ -6,8 +6,12 @@ import { invitationValidation } from '~/validations/invitationValidation'
 const Router = express.Router()
 
 Router.route('/')
+  .get(authMiddleWare.isAuthorized, invitationController.getInvitations)
   .post(authMiddleWare.isAuthorized, invitationValidation.createNewBoardInvitation, invitationController.createNewBoardInvitation)
-  .put(authMiddleWare.isAuthorized)
+
+
+Router.route('/board/:invitationId')
+  .put(authMiddleWare.isAuthorized, invitationController.updateInvitation)
 
 
 
